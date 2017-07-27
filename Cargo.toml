@@ -1,0 +1,11 @@
+[package]
+name = "Rusp Parser"
+version = "0.1.0"
+authors = ["jack-michaud <mrmichaud42@gmail.com>"]
+
+[dependencies]
+
+[[bin]]
+name = "rusp"
+path = "rusp/main.rs"
+
