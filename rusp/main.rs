@@ -4,7 +4,7 @@ use std::fs::File;
 
 mod parser;
 mod expressions;
-// const foo: str = include_str!("test.lisp");
+mod eval;
 
 fn main() {
     
@@ -22,4 +22,5 @@ fn main() {
     let my_exp = parser::parse_file(file);
     
     println!("{:?}", my_exp.stringify());
+    println!("{}", eval::evaluate(&my_exp));
 }

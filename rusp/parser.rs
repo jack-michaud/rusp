@@ -10,9 +10,7 @@ macro_rules! make_args {
             let mut to_return = Vec::new();
             $(
                 to_return.push(
-                    expressions::Argument::Atom {
-                        content: Some($x.parse::<i32>().unwrap())
-                    }
+                    expressions::Argument::Atom(Some($x.parse::<i32>().unwrap()))
                 );
             )*
             to_return
@@ -23,9 +21,10 @@ macro_rules! make_args {
 pub fn parse_file(mut f: File) -> expressions::Argument {
     let args = make_args!("2", "3");
     let mut file_string = String::new();
-    f.read_to_string(&mut file_string); 
-    println!("{:?}", tokenize(file_string));
-    let my_exp = expressions::Argument::new(String::from("+"), args);
+    let temp = f.read_to_string(&mut file_string); 
+    let mut tokenized_expr = tokenize(file_string);
+    tokenized_expr.remove(0);
+    let (my_exp, count) = parse(tokenized_expr);
     // expressions::Argument::new(String::from("+"), Vec::new())
     my_exp
 }
@@ -34,37 +33,70 @@ pub fn tokenize(mut file: String) -> Vec<String> {
     let length = file.len();
 
     // let ref mut temp_string = String::new();
-    let mut string_flag = false;
 
-    let arr: Vec<String> = file.drain(..length).fold(Vec::new(), |mut acc, s| {
+
+    let mut drainer = file.drain(..length);
+    let mut arr: Vec<String> = Vec::new();
+
+    while {
+        let (start, end) = drainer.size_hint();
+        start
+    } > 0 {
+        let s = drainer.next().unwrap();
+
         if s == '"' {
-            if !string_flag {
-                string_flag = true;
-            } else {
-                // acc.push(temp_string);
-                // temp_string = String::new();
-                string_flag = false;
-            }
-            acc.push(s.to_string());
-            acc
-        } else if s == ' ' {
-            if string_flag {
-                acc.push(s.to_string());
-                acc
-            } else {
-                acc
-            }
-        } else {
-            acc.push(s.to_string());
-            acc
-        }
-        
-    });
+            arr.push(s.to_string());
+            let mut temp_string = String::new();
 
+            loop {
+                let temp = drainer.next().unwrap();
+                if temp == '\"' {
+                    arr.push(temp_string);
+                    break;
+                } else {
+                    temp_string.push(temp);
+                }
+            }
+        } if s == ' ' {
+
+        } else {
+            arr.push(s.to_string());
+        }
+    }
     arr
 }
-// fn parse(tokens: Vec<String>) -> expressions::Argument {
-//  // String parse
-//  // let four: u32 = "4".parse().unwrap();
-//  expressions
-// }
+
+fn parse(mut tokens: Vec<String>) -> (expressions::Argument,i32) {
+    let func = tokens.first().unwrap().clone();
+    tokens.remove(0);
+
+    let mut arg = expressions::Argument::new(func);
+
+    let mut count = 1;
+    while tokens.len() > 0 {
+        let next = tokens.first().unwrap().clone();
+        tokens.remove(0);
+        count += 1;
+        if next == ")" {
+            break
+        }
+        if next == "(" {
+
+            let (new_arg, jump_amount) = parse(tokens.clone());
+            arg.add_arg(new_arg);
+            for n in 0..jump_amount {
+                tokens.remove(0);
+            }
+        } else {
+            match next.parse::<i32>() {
+                Ok(r) => {
+                    arg.add_arg(expressions::Argument::Atom(Some(r)));
+                },
+                Err(_) => {},
+            }
+        }
+    }
+
+    (arg, count)
+}
+

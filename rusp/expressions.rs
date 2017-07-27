@@ -2,26 +2,36 @@ use std::fmt;
 
 
 pub enum Argument {
-    Expression {
-        func:   String,
-        args: Box<Vec<Argument>>,
-    },
-    Atom {
-        content: Option<i32>
-    }
+    Expression(String, Box<Vec<Argument>>),
+    Atom(Option<i32>)
 }
-
 
 impl Argument {
 
-    pub fn new(func: String, args: Vec<Argument>) -> Argument {
-        Argument::Expression { func: func, args: Box::new(args) }
+    pub fn new(func: String) -> Argument {
+        Argument::Expression(func, Box::new(Vec::new()))
+    }
+
+    pub fn arg_length(self) -> usize {
+        match self {
+            Argument::Expression (_, args) => args.len(),
+            Argument::Atom(_) => 0
+        }
+
+    }
+
+    pub fn add_arg(&mut self, a: Argument) {
+        match *self {
+            Argument::Expression(ref func, ref mut args) => {
+                args.push(a);
+            },
+            _ => panic!("Cannot push argument to Atom"),
+        }
     }
 
     pub fn stringify(&self) -> String {
         match *self {
-            Argument::Expression { ref args, ref func } => {
-                println!("We got an expression");
+            Argument::Expression(ref func, ref args) => {
                 let mut to_return = String::from("(");
                 to_return.push_str(func.as_str());
                 to_return.push_str(" ");
@@ -32,8 +42,7 @@ impl Argument {
                 to_return.push_str(")");
                 to_return
             },
-            Argument::Atom { ref content } => {
-                println!("We got an Atom");
+            Argument::Atom(ref content) => {
                 match *content {
                     Some(ref i) => {
                         let mut to_return = String::from("");
