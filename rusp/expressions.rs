@@ -3,9 +3,9 @@ use std::fmt;
 
 pub enum Argument {
     Expression {
-	    func:   String,
-	    args: Box<Vec<Argument>>,
-	},
+        func:   String,
+        args: Box<Vec<Argument>>,
+    },
     Atom {
         content: Option<i32>
     }
@@ -19,10 +19,10 @@ impl Argument {
     }
 
     pub fn stringify(&self) -> String {
-    	match *self {
-    		Argument::Expression { ref args, ref func } => {
-    			println!("We got an expression");
-    			let mut to_return = String::from("(");
+        match *self {
+            Argument::Expression { ref args, ref func } => {
+                println!("We got an expression");
+                let mut to_return = String::from("(");
                 to_return.push_str(func.as_str());
                 to_return.push_str(" ");
                 for arg in args.iter() {
@@ -31,9 +31,9 @@ impl Argument {
                 }
                 to_return.push_str(")");
                 to_return
-    		},
-    		Argument::Atom { ref content } => {
-    			println!("We got an Atom");
+            },
+            Argument::Atom { ref content } => {
+                println!("We got an Atom");
                 match *content {
                     Some(ref i) => {
                         let mut to_return = String::from("");
@@ -43,9 +43,9 @@ impl Argument {
                     None => String::from("")
                 }
                 
-    		}
+            }
 
-    	}
+        }
     }
 }
 
