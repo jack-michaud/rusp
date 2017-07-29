@@ -14,7 +14,7 @@ pub fn evaluate(expr: &Argument, handler: &mut EventHandler) -> i32 {
 	}
 }
 
-// Arguments, the handler context, name of the function
+// Arguments, the handler context
 pub type Function = fn(Vec<Argument>, &mut EventHandler) -> i32;
 
 pub struct EventHandler {
@@ -33,7 +33,6 @@ impl EventHandler {
 
 	}
 }
-
 
 pub fn add(args: Vec<Argument>, handler: &mut EventHandler) -> i32 {
     let evaluate_with_handler = |a: &Argument| -> i32 { evaluate(a, handler) };
@@ -61,8 +60,37 @@ pub fn mult(args: Vec<Argument>, handler: &mut EventHandler) -> i32 {
 	})
 }
 
+pub fn division(args: Vec<Argument>, handler: &mut EventHandler) -> i32 {
+	let evaluate_with_handler = |a: &Argument| -> i32 { evaluate(a, handler) };
+	let divide = |acc: i32, a: &i32| -> i32 { 
+		println!("{} / {}", acc, a);
+		acc / a 
+	};
+
+	let mut evaluated_args: Vec<i32> = args.iter().map(evaluate_with_handler).collect();
+	let first = evaluated_args.first().unwrap().clone();
+	evaluated_args.remove(0);
+
+	evaluated_args.iter().fold(first, divide)
+}
+
 pub fn double_all(args: Vec<Argument>, handler: &mut EventHandler) -> i32 {
 	let mut evaluate_with_handler = |a: &Argument| -> i32 { evaluate(a, handler) };
 	let double = |a: &Argument| -> i32 { 2 * evaluate_with_handler(a) };
 	args.iter().map(double).sum()
 }
+
+pub fn power_of(args: Vec<Argument>, handler: &mut EventHandler) -> i32 {
+	let evaluate_with_handler = |a: &Argument| -> i32 { evaluate(a, handler) };
+	let power = |acc: i32, a: &i32| -> i32 { acc.pow(*a as u32) };
+
+	let mut evaluated_args: Vec<i32> = args.iter().map(evaluate_with_handler).collect();
+	let first = evaluated_args.first().unwrap().clone();
+	evaluated_args.remove(0);
+
+	evaluated_args.iter().fold(first, power)
+}
+
+// pub fn template(args: Vec<Argument>, handler: &mut EventHandler) -> i32 {
+// 	...
+// }

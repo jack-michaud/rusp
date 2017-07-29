@@ -28,7 +28,9 @@ fn main() {
     handler.add_function("+".to_string(), eval::add);
     handler.add_function("-".to_string(), eval::sub);
     handler.add_function("*".to_string(), eval::mult);
+    handler.add_function("/".to_string(), eval::division);
     handler.add_function("double".to_string(), eval::double_all);
+    handler.add_function("pow".to_string(), eval::power_of);
 
     println!("{}", eval::evaluate(&my_exp, &mut handler));
 }
