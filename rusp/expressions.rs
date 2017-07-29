@@ -1,6 +1,7 @@
 use std::fmt;
 
 
+#[derive(Clone)]
 pub enum Argument {
     Expression(String, Box<Vec<Argument>>),
     Atom(Option<i32>)

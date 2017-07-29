@@ -19,12 +19,11 @@ macro_rules! make_args {
 }
 
 pub fn parse_file(mut f: File) -> expressions::Argument {
-    let args = make_args!("2", "3");
     let mut file_string = String::new();
-    let temp = f.read_to_string(&mut file_string); 
+    let _ = f.read_to_string(&mut file_string); 
     let mut tokenized_expr = tokenize(file_string);
     tokenized_expr.remove(0);
-    let (my_exp, count) = parse(tokenized_expr);
+    let (my_exp, _) = parse(tokenized_expr);
     // expressions::Argument::new(String::from("+"), Vec::new())
     my_exp
 }
@@ -37,6 +36,8 @@ pub fn tokenize(mut file: String) -> Vec<String> {
 
     let mut drainer = file.drain(..length);
     let mut arr: Vec<String> = Vec::new();
+    let mut started_value = false;
+    let mut accumulated_value = String::new();
 
     while {
         let (start, end) = drainer.size_hint();
@@ -44,7 +45,14 @@ pub fn tokenize(mut file: String) -> Vec<String> {
     } > 0 {
         let s = drainer.next().unwrap();
 
-        if s == '"' {
+        if s == '(' || s == ')' {
+            if started_value {
+                started_value = false;
+                arr.push(accumulated_value);
+                accumulated_value = String::new();
+            }
+            arr.push(s.to_string());
+        } else if s == '"' {
             arr.push(s.to_string());
             let mut temp_string = String::new();
 
@@ -57,10 +65,15 @@ pub fn tokenize(mut file: String) -> Vec<String> {
                     temp_string.push(temp);
                 }
             }
-        } if s == ' ' {
-
+        } else if s == ' ' {
+            if started_value {
+                started_value = false;
+                arr.push(accumulated_value);
+                accumulated_value = String::new();
+            }
         } else {
-            arr.push(s.to_string());
+            started_value = true;
+            accumulated_value.push(s);
         }
     }
     arr
@@ -84,7 +97,7 @@ fn parse(mut tokens: Vec<String>) -> (expressions::Argument,i32) {
 
             let (new_arg, jump_amount) = parse(tokens.clone());
             arg.add_arg(new_arg);
-            for n in 0..jump_amount {
+            for _ in 0..jump_amount {
                 tokens.remove(0);
             }
         } else {

@@ -1,4 +1,5 @@
 use std::env;
+use std::collections::HashMap;
 
 use std::fs::File;
 
@@ -22,5 +23,12 @@ fn main() {
     let my_exp = parser::parse_file(file);
     
     println!("{:?}", my_exp.stringify());
-    println!("{}", eval::evaluate(&my_exp));
+
+    let mut handler = eval::EventHandler { functions: HashMap::new() };
+    handler.add_function("+".to_string(), eval::add);
+    handler.add_function("-".to_string(), eval::sub);
+    handler.add_function("*".to_string(), eval::mult);
+    handler.add_function("double".to_string(), eval::double_all);
+
+    println!("{}", eval::evaluate(&my_exp, &mut handler));
 }
